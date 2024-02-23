@@ -3,7 +3,7 @@ from vnstock import *
 import pandas as pd
 
 filtered_df =df.query('epsGrowth5Year > 0 & pe < 9 & pb < 1.2 & lastQuarterProfitGrowth > 0.2')
-filtered_df = filtered_df.sort_values(by='epsGrowth5Year', ascending=False)
+filtered_df = filtered_df.sort_values(by='pe', ascending=False)
 
 # Calculate total weight
 total_weight = 1.0  
