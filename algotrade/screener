@@ -1,23 +1,27 @@
+!pip install -U vnstock
+from vnstock import *
 import pandas as pd
-import numpy as np
 
-# Load sample stock data (replace with your actual data)
-data = pd.read_csv("...")
+filtered_df =df.query('epsGrowth5Year > 0 & pe < 9 & pb < 1.2 & lastQuarterProfitGrowth > 0.2')
+filtered_df = filtered_df.sort_values(by='epsGrowth5Year', ascending=False)
 
-# Calculate earnings per share (EPS) growth rate
-data["EPS_growth"] = data["EPS"].pct_change() * 100
+# Calculate total weight
+total_weight = 1.0  
 
-# Calculate relative strength (RS) compared to a benchmark
-benchmark = pd.read_csv("benchmark_data.csv")
-data["RS"] = data["Close"] / benchmark["Close"]
+# Set weights based on normalized ranks (phân bổ theo EPS giảm dần)
+filtered_df['weight'] = filtered_df['pe'].rank(ascending=True) / filtered_df.shape[0]
 
-# Calculate accumulation/distribution (A/D) line
-data["A_D"] = ((data["Close"] - data["Low"]) - (data["High"] - data["Close"])) / (data["High"] - data["Low"]) * data["Volume"]
-data["A_D"] = data["A_D"].cumsum()
+# Normalize weights to sum to total_weight
+filtered_df['weight'] = filtered_df['weight'] * total_weight / filtered_df['weight'].sum()
 
-# Calculate 52-week high and low
-data["52w_high"] = data["Close"].rolling(window=252).max()
-data["52w_low"] = data["Close"].rolling(window=252).min()
+# Label tickers with weights (optional)
+labeled_tickers = []
+for index, row in filtered_df.iterrows():
+    ticker = row['ticker']  # Replace 'Mã' with your actual ticker column name
+    weight = row['weight']
+    labeled_tickers.append(f"{ticker}: {weight:.2f}")
 
-# Print selected indicators
-print(data[["Date", "Close", "EPS_growth", "RS", "A_D", "52w_high", "52w_low"]].tail())
+# Print labeled tickers (optional)
+print("Labeled tickers with weights:")
+for ticker in labeled_tickers:
+    print(ticker)
