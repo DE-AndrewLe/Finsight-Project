@@ -1,1 +1,1 @@
-# finsight-project
+# Finsight-Project
